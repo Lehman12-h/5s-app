@@ -1,0 +1,37 @@
+{
+  "id": "area-B1",
+  "name": "第1倉庫 入出庫エリア",
+  "location": "第1工場 1F 西側",
+  "updated": "2026-06-05",
+  "updatedBy": "倉庫管理 佐藤",
+  "category": "倉庫",
+  "items": [
+    {
+      "id": "B1-001",
+      "title": "フォークリフト走行注意",
+      "priority": "critical",
+      "description": "歩行者通路とフォークリフト走行路を必ず分離する。交差部では一時停止し指差し確認を行うこと。",
+      "image": "images/area-B1-forklift.jpg",
+      "imageAlt": "フォークリフト走行路と歩行者通路の区分",
+      "tags": ["安全", "整頓"]
+    },
+    {
+      "id": "B1-002",
+      "title": "在庫の定位置管理",
+      "priority": "high",
+      "description": "棚番号ラベルに従って在庫を配置する。床への直置きは禁止。",
+      "image": "",
+      "imageAlt": "",
+      "tags": ["整頓", "整理"]
+    },
+    {
+      "id": "B1-003",
+      "title": "消火器前の確保",
+      "priority": "normal",
+      "description": "消火器・消火栓の前には荷物を置かないこと。常に取り出せる状態を保つ。",
+      "image": "",
+      "imageAlt": "",
+      "tags": ["安全", "清潔"]
+    }
+  ]
+}

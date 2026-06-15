@@ -1,0 +1,19 @@
+{
+  "id": "area-XX",
+  "name": "現場の正式名称をここに入力",
+  "location": "建屋・フロア・エリアをここに入力",
+  "updated": "2026-06-11",
+  "updatedBy": "所属 氏名",
+  "category": "製造",
+  "items": [
+    {
+      "id": "XX-001",
+      "title": "注意事項の件名（20文字以内推奨）",
+      "priority": "normal",
+      "description": "具体的な指示内容をここに記載します（200文字以内推奨）。",
+      "image": "images/area-XX-sample.jpg",
+      "imageAlt": "画像の説明（スクリーンリーダー用代替テキスト）",
+      "tags": ["整理", "整頓"]
+    }
+  ]
+}

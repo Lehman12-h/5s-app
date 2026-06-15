@@ -1,0 +1,37 @@
+{
+  "id": "area-A1",
+  "name": "第1製造ライン A工程",
+  "location": "第1工場 1F 東側",
+  "updated": "2026-06-01",
+  "updatedBy": "安全管理 山田",
+  "category": "製造",
+  "items": [
+    {
+      "id": "A1-002",
+      "title": "通路の確保",
+      "priority": "critical",
+      "description": "黄色ラインより内側に物を置かないこと。緊急時の避難経路を常に確保する。",
+      "image": "images/area-A1-passage.jpg",
+      "imageAlt": "通路確保の基準線",
+      "tags": ["安全", "整頓"]
+    },
+    {
+      "id": "A1-001",
+      "title": "工具棚の整理",
+      "priority": "high",
+      "description": "使用後は必ず所定の位置に戻すこと。棚の上に物を置かない。",
+      "image": "images/area-A1-shelf.jpg",
+      "imageAlt": "工具棚の正しい整理例",
+      "tags": ["整理", "整頓"]
+    },
+    {
+      "id": "A1-003",
+      "title": "作業台の清掃",
+      "priority": "normal",
+      "description": "作業終了時に作業台の切粉・油分を拭き取り、清潔な状態を保つこと。",
+      "image": "",
+      "imageAlt": "",
+      "tags": ["清掃", "清潔"]
+    }
+  ]
+}
