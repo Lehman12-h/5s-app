@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QRコード印刷（A4） — 5S活動</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .gen-config {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow);
+      }
+      .gen-config label {
+        display: block;
+        font-weight: 700;
+        font-size: 14px;
+        margin: 10px 0 6px;
+      }
+      .gen-config input,
+      .gen-config select {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 18px;
+        min-height: 44px;
+        line-height: 24px;
+        background: var(--color-header);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .btn--ghost {
+        background: #fff;
+        color: var(--color-header);
+        border: 1px solid var(--color-header);
+      }
+
+      /* A4印刷シート（1現場 = 1ページ） */
+      .sheet {
+        background: #fff;
+        width: 210mm;
+        max-width: 100%;
+        min-height: 287mm;
+        margin: 0 auto 20px;
+        padding: 25mm 20mm;
+        box-shadow: var(--shadow);
+        text-align: center;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .sheet__brand {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--color-header);
+        letter-spacing: 0.08em;
+      }
+      .sheet__name {
+        font-size: 40px;
+        font-weight: 800;
+        margin: 8px 0 4px;
+      }
+      .sheet__loc {
+        font-size: 22px;
+        color: var(--color-text-sub);
+        margin-bottom: 24px;
+      }
+      .sheet canvas {
+        width: 120mm;
+        height: 120mm;
+        image-rendering: pixelated;
+      }
+      .sheet__guide {
+        font-size: 22px;
+        font-weight: 700;
+        margin-top: 24px;
+      }
+      .sheet__url {
+        font-size: 14px;
+        color: var(--color-text-sub);
+        word-break: break-all;
+        margin-top: 12px;
+      }
+
+      @media print {
+        .app-header,
+        .gen-config,
+        .toolbar,
+        .app-footer {
+          display: none !important;
+        }
+        body {
+          background: #fff;
+        }
+        .container {
+          padding: 0;
+          max-width: none;
+        }
+        .sheet {
+          box-shadow: none;
+          margin: 0;
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <p class="app-header__brand">5S活動 — 管理</p>
+      <h1 class="app-header__title">QRコード印刷（A4）</h1>
+    </header>
+
+    <main class="container">
+      <section class="gen-config">
+        <label for="baseUrl">公開URL（GitHub Pages のベースURL）</label>
+        <input
+          id="baseUrl"
+          type="url"
+          placeholder="https://ユーザー名.github.io/5s-app/"
+        />
+        <label for="areaSelect">印刷する現場</label>
+        <select id="areaSelect">
+          <option value="__all__">すべての現場（全ページ）</option>
+        </select>
+      </section>
+
+      <div class="toolbar">
+        <button class="btn" id="printBtn" type="button">🖨 印刷する</button>
+        <a class="btn btn--ghost" href="admin.html">QRコード一覧へ戻る</a>
+      </div>
+
+      <div id="sheets">
+        <p class="state">公開URLを入力すると印刷プレビューが表示されます。</p>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>A4用紙に印刷し、各現場に掲示してください。</p>
+    </footer>
+
+    <script src="qrcode.js"></script>
+    <script src="app.js"></script>
+    <script>
+      "use strict";
+
+      const STORAGE_KEY = "5s-admin-base-url";
+      const baseInput = document.getElementById("baseUrl");
+      const areaSelect = document.getElementById("areaSelect");
+      const sheets = document.getElementById("sheets");
+
+      baseInput.value = localStorage.getItem(STORAGE_KEY) || "";
+
+      function buildUrl(base, areaId) {
+        const b = base.endsWith("/") ? base : base + "/";
+        return `${b}?area=${encodeURIComponent(areaId)}`;
+      }
+
+      let areas = [];
+
+      async function loadAreas() {
+        const results = await Promise.all(
+          AREA_IDS.map(async (id) => {
+            try {
+              const res = await fetch(`areas/${id}.json`, { cache: "no-cache" });
+              if (!res.ok) throw new Error();
+              return await res.json();
+            } catch (e) {
+              return { id, name: "(読み込み失敗)", location: "" };
+            }
+          })
+        );
+        return results;
+      }
+
+      function populateSelect() {
+        areas.forEach((a) => {
+          const opt = document.createElement("option");
+          opt.value = a.id;
+          opt.textContent = `${a.name}（${a.id}）`;
+          areaSelect.appendChild(opt);
+        });
+      }
+
+      function makeSheet(area, base) {
+        const url = buildUrl(base, area.id);
+        const sheet = document.createElement("section");
+        sheet.className = "sheet";
+
+        sheet.innerHTML = `
+          <p class="sheet__brand">5S活動 注意箇所</p>
+          <p class="sheet__name"></p>
+          <p class="sheet__loc"></p>
+          <p class="sheet__guide">📷 スマホのカメラで読み取ってください</p>
+          <p class="sheet__url"></p>`;
+        sheet.querySelector(".sheet__name").textContent = area.name;
+        sheet.querySelector(".sheet__loc").textContent = area.location || "";
+        sheet.querySelector(".sheet__url").textContent = url;
+
+        const canvas = document.createElement("canvas");
+        try {
+          const matrix = QRCode.generate(url, "M");
+          QRCode.renderCanvas(canvas, matrix, { scale: 10, margin: 4 });
+        } catch (e) {
+          canvas.replaceWith(document.createTextNode("QR生成エラー"));
+        }
+        // QRコードはガイド文の前（中央）に挿入
+        sheet.insertBefore(canvas, sheet.querySelector(".sheet__guide"));
+        return sheet;
+      }
+
+      function render() {
+        const base = baseInput.value.trim();
+        if (!base) {
+          sheets.innerHTML =
+            '<p class="state">公開URLを入力すると印刷プレビューが表示されます。</p>';
+          return;
+        }
+        const selected = areaSelect.value;
+        const target =
+          selected === "__all__" ? areas : areas.filter((a) => a.id === selected);
+        sheets.innerHTML = "";
+        target.forEach((a) => sheets.appendChild(makeSheet(a, base)));
+      }
+
+      baseInput.addEventListener("input", () => {
+        localStorage.setItem(STORAGE_KEY, baseInput.value.trim());
+        render();
+      });
+      areaSelect.addEventListener("change", render);
+      document.getElementById("printBtn").addEventListener("click", () =>
+        window.print()
+      );
+
+      (async function init() {
+        areas = await loadAreas();
+        populateSelect();
+        render();
+      })();
+    </script>
+  </body>
+</html>

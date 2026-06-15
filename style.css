@@ -1,0 +1,300 @@
+/* =========================================================
+   5S活動 QRコード閲覧システム — 共通スタイル
+   モバイルファースト（基準幅 375px / iPhone SE）
+   外部CSS・外部フォントは一切読み込まない（オフライン対応）
+   ========================================================= */
+
+/* ----- リセット ----- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-text: #1f2933;
+  --color-text-sub: #616e7c;
+  --color-border: #e1e5ea;
+  --color-header: #1f4e79;
+  --color-header-text: #ffffff;
+
+  --color-critical: #d32f2f;
+  --color-high: #ef6c00;
+  --color-normal: #9aa5b1;
+
+  --color-tag-bg: #eef2f6;
+  --color-tag-text: #486581;
+
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --max-width: 720px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: "Helvetica Neue", "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans", Meiryo, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ----- ヘッダー（固定） ----- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-header);
+  color: var(--color-header-text);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+
+.app-header__brand {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+}
+
+.app-header__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* ----- レイアウトコンテナ ----- */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ----- メタ情報（場所・更新日） ----- */
+.area-meta {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.area-meta__location {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.area-meta__updated {
+  font-size: 14px;
+  color: var(--color-text-sub);
+  margin-top: 4px;
+}
+
+.area-meta__category {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-header);
+  background: var(--color-tag-bg);
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-top: 8px;
+}
+
+/* ----- アイテムカード ----- */
+.item-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.item-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.item-card__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.item-card__title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.item-card__image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  margin: 12px 0;
+  background: var(--color-tag-bg);
+}
+
+.item-card__desc {
+  font-size: 16px;
+  white-space: pre-wrap;
+}
+
+/* ----- priority バッジ ----- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.badge--critical {
+  background: var(--color-critical);
+}
+
+.badge--high {
+  background: var(--color-high);
+}
+
+/* normal はバッジ非表示（ラベルなし） */
+.item-card--critical {
+  border-left: 5px solid var(--color-critical);
+}
+
+.item-card--high {
+  border-left: 5px solid var(--color-high);
+}
+
+.item-card--normal {
+  border-left: 5px solid var(--color-normal);
+}
+
+/* ----- タグ ----- */
+.tag-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tag {
+  font-size: 12px;
+  color: var(--color-tag-text);
+  background: var(--color-tag-bg);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+/* ----- エリア一覧（トップページ） ----- */
+.area-index {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.area-index__link {
+  display: block;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-decoration: none;
+  color: var(--color-text);
+  box-shadow: var(--shadow);
+  min-height: 44px;
+}
+
+.area-index__name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.area-index__location {
+  font-size: 14px;
+  color: var(--color-text-sub);
+  margin-top: 4px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* ----- 状態表示（読み込み中・エラー） ----- */
+.state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--color-text-sub);
+}
+
+.state__icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.state__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.state__action {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  min-height: 44px;
+  line-height: 24px;
+  background: var(--color-header);
+  color: #fff;
+  text-decoration: none;
+  border-radius: var(--radius);
+  font-weight: 700;
+}
+
+/* ----- フッター ----- */
+.app-footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-sub);
+  padding: 24px 16px 40px;
+}
+
+/* ----- スクリーンリーダー専用 ----- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ----- 画面が広い場合（PCでも崩れない最小限の対応） ----- */
+@media (min-width: 600px) {
+  .app-header__title {
+    font-size: 24px;
+  }
+}

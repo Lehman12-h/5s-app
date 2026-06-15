@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>管理者用 QRコード一覧 — 5S活動</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* 管理ページ専用スタイル（閲覧画面とは別レイアウト） */
+      .admin-config {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+      }
+      .admin-config label {
+        display: block;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 6px;
+      }
+      .admin-config input {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+      }
+      .admin-config small {
+        display: block;
+        color: var(--color-text-sub);
+        margin-top: 6px;
+      }
+      .qr-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .qr-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        padding: 16px;
+        text-align: center;
+        box-shadow: var(--shadow);
+      }
+      .qr-card canvas {
+        width: 200px;
+        height: 200px;
+        image-rendering: pixelated;
+      }
+      .qr-card__name {
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 8px;
+      }
+      .qr-card__loc {
+        font-size: 13px;
+        color: var(--color-text-sub);
+      }
+      .qr-card__url {
+        font-size: 11px;
+        color: var(--color-text-sub);
+        word-break: break-all;
+        margin-top: 6px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 18px;
+        min-height: 44px;
+        line-height: 24px;
+        background: var(--color-header);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .btn--ghost {
+        background: #fff;
+        color: var(--color-header);
+        border: 1px solid var(--color-header);
+      }
+      @media print {
+        .app-header,
+        .admin-config,
+        .toolbar,
+        .app-footer,
+        .qr-card__url {
+          display: none !important;
+        }
+        .qr-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .qr-card {
+          break-inside: avoid;
+          border: 1px solid #999;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <p class="app-header__brand">5S活動 — 管理</p>
+      <h1 class="app-header__title">QRコード一覧</h1>
+    </header>
+
+    <main class="container">
+      <section class="admin-config">
+        <label for="baseUrl">公開URL（GitHub Pages のベースURL）</label>
+        <input
+          id="baseUrl"
+          type="url"
+          placeholder="https://ユーザー名.github.io/5s-app/"
+        />
+        <small>
+          末尾の <code>/</code> まで含めて入力してください。入力するとQRコードが自動で更新されます。
+        </small>
+      </section>
+
+      <div class="toolbar">
+        <button class="btn" id="printBtn" type="button">🖨 一覧を印刷</button>
+        <a class="btn btn--ghost" href="qr-generator.html">印刷用ページ（A4）へ</a>
+      </div>
+
+      <div class="qr-grid" id="grid">
+        <p class="state">読み込み中…</p>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>このページは管理者用です。現場には掲示しません。</p>
+    </footer>
+
+    <script src="qrcode.js"></script>
+    <script src="app.js"></script>
+    <script>
+      "use strict";
+
+      const STORAGE_KEY = "5s-admin-base-url";
+      const baseInput = document.getElementById("baseUrl");
+      const grid = document.getElementById("grid");
+
+      // 前回入力したベースURLを復元（個人情報ではないため保存して差し支えない）
+      baseInput.value = localStorage.getItem(STORAGE_KEY) || "";
+
+      function buildUrl(base, areaId) {
+        const b = base.endsWith("/") ? base : base + "/";
+        return `${b}?area=${encodeURIComponent(areaId)}`;
+      }
+
+      async function loadAreas() {
+        const results = await Promise.all(
+          AREA_IDS.map(async (id) => {
+            try {
+              const res = await fetch(`areas/${id}.json`, { cache: "no-cache" });
+              if (!res.ok) throw new Error();
+              return await res.json();
+            } catch (e) {
+              return { id, name: "(読み込み失敗)", location: "" };
+            }
+          })
+        );
+        return results;
+      }
+
+      function render(areas) {
+        const base = baseInput.value.trim();
+        if (!base) {
+          grid.innerHTML =
+            '<p class="state">上の入力欄に公開URLを入力すると、QRコードが表示されます。</p>';
+          return;
+        }
+        grid.innerHTML = "";
+        areas.forEach((area) => {
+          const url = buildUrl(base, area.id);
+          const card = document.createElement("div");
+          card.className = "qr-card";
+
+          const canvas = document.createElement("canvas");
+          try {
+            const matrix = QRCode.generate(url, "M");
+            QRCode.renderCanvas(canvas, matrix, { scale: 6, margin: 4 });
+          } catch (e) {
+            canvas.replaceWith(document.createTextNode("QR生成エラー"));
+          }
+          card.appendChild(canvas);
+
+          const name = document.createElement("p");
+          name.className = "qr-card__name";
+          name.textContent = area.name;
+          card.appendChild(name);
+
+          const loc = document.createElement("p");
+          loc.className = "qr-card__loc";
+          loc.textContent = area.location || "";
+          card.appendChild(loc);
+
+          const urlEl = document.createElement("p");
+          urlEl.className = "qr-card__url";
+          urlEl.textContent = url;
+          card.appendChild(urlEl);
+
+          grid.appendChild(card);
+        });
+      }
+
+      let cachedAreas = [];
+
+      baseInput.addEventListener("input", () => {
+        localStorage.setItem(STORAGE_KEY, baseInput.value.trim());
+        render(cachedAreas);
+      });
+
+      document.getElementById("printBtn").addEventListener("click", () => {
+        window.print();
+      });
+
+      (async function init() {
+        cachedAreas = await loadAreas();
+        render(cachedAreas);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>5S活動 閲覧システム</title>
+    <meta name="description" content="5S活動の現場別注意事項を閲覧するページです。" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <p class="app-header__brand">5S活動</p>
+      <h1 class="app-header__title" id="header-title">現場別 注意事項</h1>
+    </header>
+
+    <main class="container" id="content" aria-live="polite">
+      <!-- app.js が内容を描画します -->
+      <noscript>
+        <p class="state">
+          このページの表示には JavaScript が必要です。ブラウザの設定をご確認ください。
+        </p>
+      </noscript>
+    </main>
+
+    <footer class="app-footer">
+      <p>5S活動 QRコード閲覧システム</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
